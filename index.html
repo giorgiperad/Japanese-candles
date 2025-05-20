@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ამინდის პროგნოზი - მრავალი ლოკაცია</title>
+  <title>სათევზაო ამინდი</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .weather-table {
@@ -78,9 +78,8 @@
   </div>
 
   <script>
-    const apiKey = 'YOUR_API_KEY'; // Replace with your valid OpenWeatherMap API key
+    const apiKey = 'b5f3b44e0ff36c689aa09e1c5f227d6d'; // Provided OpenWeatherMap API key
     const locations = [
-      { id: 'darkha', name: 'დარყა', lat: 42.3167, lon: 42.9667 },
       { id: 'sion', name: 'სიონი', lat: 41.6333, lon: 44.0833 },
       { id: 'tsalka', name: 'წალკა', lat: 41.5946, lon: 44.0891 },
       { id: 'bazaleti', name: 'ბაზალეთი', lat: 42.0833, lon: 44.6833 },
@@ -142,7 +141,7 @@
             </div>
           `;
         } else {
-          currentWeatherHtml = '<p class="text-red-600 text-center">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა. გთხოვთ, შეამოწმოთ API გასაღები.</p>';
+          currentWeatherHtml = '<p class="text-red-600 text-center">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა. გთხოვთ, შეამოწმოთ API გასაღები ან ინტერნეტ კავშირი.</p>';
         }
 
         let forecastHtml = '';
