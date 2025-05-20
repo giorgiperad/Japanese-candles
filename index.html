@@ -1,187 +1,183 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>სათევზაო ამინდის პროგნოზი</title>
   <style>
-    /* Reset & base */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #e0f7fa; color: #004d40; }
-    header { background: #006064; color: #e0f2f1; text-align: center; padding: 1rem; font-size: 1.8rem; }
-
-    /* Tabs */
-    .tabs { display: flex; overflow-x: auto; background: #004d40; }
-    .tabs button {
-      flex: 1 0 auto;
-      padding: 0.75rem;
-      border: none;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #e0f7fa, #b2ebf2);
+      color: #006064;
+    }
+    header {
       background: #004d40;
       color: #e0f2f1;
-      font-size: 1rem;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
     }
-    .tabs button.active { background: #00838f; }
-
-    /* Content */
-    .tab-content { display: none; padding: 1rem; }
-    .tab-content.active { display: block; }
-
-    /* Card */
-    .city-card { background: #ffffffcc; border-radius: 12px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-    .city-header { display: flex; justify-content: space-between; align-items: center; }
-    .city-name { font-size: 1.3rem; font-weight: bold; }
-    .temp { font-size: 2rem; color: #00796b; display: flex; align-items: center; }
-    .temp img { width: 40px; height: 40px; margin-right: 0.5rem; }
-    .desc { font-style: italic; color: #555; margin-top: 0.25rem; }
-    .details { font-size: 0.85rem; color: #333; margin: 0.5rem 0; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 0.5rem; text-align: center; border: 1px solid #b2dfdb; font-size: 0.85rem; }
-    th { background: #004d40; color: #e0f2f1; }
-    .rating { font-weight: bold; margin-top: 0.5rem; }
-
-    /* Responsive */
-    @media (min-width: 600px) {
-      .tabs button { font-size: 1.1rem; }
-      .city-name { font-size: 1.5rem; }
+    .weather-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .city-card {
+      background: #ffffffcc;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .city-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .city-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+    .temp {
+      font-size: 2rem;
+      color: #00796b;
+    }
+    .desc {
+      font-style: italic;
+      color: #555;
+    }
+    .details {
+      font-size: 0.9rem;
+      color: #333;
+      margin-top: 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+    }
+    th, td {
+      padding: 0.5rem;
+      text-align: center;
+      border: 1px solid #b2dfdb;
+    }
+    th {
+      background: #004d40;
+      color: #e0f2f1;
+    }
+    .rating {
+      font-weight: bold;
+      margin-top: 0.5rem;
+      color: #004d40;
+    }
+    .error {
+      color: #b71c1c;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <header>სათევზაო ამინდის პროგნოზი</header>
 
-  <!-- Tabs -->
-  <div class="tabs" id="tabs"></div>
+<header>სათევზაო ამინდის პროგნოზი</header>
+<div class="weather-container" id="weatherContainer"></div>
 
-  <!-- Tab contents -->
-  <div id="contents"></div>
+<script>
+  const apiKey = "b5f3b44e0ff36c689aa09e1c5f227d6d";
+  const cities = [
+    { name: "თბილისი", query: "Tbilisi,GE" },
+    { name: "სიონი", query: "Sioni,GE" },
+    { name: "წალკა", query: "Tsalka,GE" },
+    { name: "ბაზალეთი", query: "Bazaleti,GE" },
+    { name: "ნადარბაზევი", query: "Nadarbazevi,GE" },
+    { name: "რუსთავი", query: "Rustavi,GE" }
+  ];
+  const container = document.getElementById("weatherContainer");
 
-  <script>
-    const apiKey = "b5f3b44e0ff36c689aa09e1c5f227d6d";
-    const cities = [
-      { name: "თბილისი", query: "Tbilisi,GE" },
-      { name: "სიონი", query: "Sioni,GE" },
-      { name: "წალკა", query: "Tsalka,GE" },
-      { name: "ბაზალეთი", query: "Bazaleti,GE" },
-      { name: "ნადარბაზევი", query: "Nadarbazevi,GE" },
-      { name: "რუსთავი", query: "Rustavi,GE" }
-    ];
-
-    const tabsEl = document.getElementById("tabs");
-    const contentsEl = document.getElementById("contents");
-
-    // Helper: compute fishing rating
-    function rateFishing({ wind, clouds, tempDay, pop }) {
-      let score = 0;
-      if (wind <= 3) score += 2; else if (wind <= 6) score += 1;
-      if (clouds >= 20 && clouds <= 80) score += 2;
-      if (tempDay >= 10 && tempDay <= 25) score += 2;
-      if (pop < 0.2) score += 1;  // low chance of rain
-      // score max = 7
-      if (score >= 6) return "Excellent";
-      if (score >= 4) return "Good";
-      if (score >= 2) return "Fair";
-      return "Poor";
+  function rateFishingConditions(temp, wind, pressure) {
+    if (temp > 5 && temp < 25 && wind < 5 && pressure > 1010 && pressure < 1025) {
+      return "შესანიშნავი პირობები თევზაობისთვის";
+    } else if (wind > 8 || pressure < 1000) {
+      return "არასახარბიელო პირობები";
+    } else {
+      return "საშუალო პირობები";
     }
+  }
 
-    // Create tabs and content containers
-    cities.forEach((city, idx) => {
-      const btn = document.createElement("button");
-      btn.textContent = city.name;
-      if (idx === 0) btn.classList.add("active");
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
-        document.getElementById(`content-${idx}`).classList.add("active");
-      });
-      tabsEl.appendChild(btn);
+  cities.forEach(async city => {
+    const card = document.createElement("div");
+    card.className = "city-card";
+    card.innerHTML = `<div class="city-name">${city.name}</div><div class="desc">იტვირთება...</div>`;
+    container.appendChild(card);
 
-      const content = document.createElement("div");
-      content.id = `content-${idx}`;
-      content.className = "tab-content" + (idx === 0 ? " active" : "");
-      contentsEl.appendChild(content);
-    });
+    try {
+      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city.query}&units=metric&lang=ka&appid=${apiKey}`);
+      if (!res.ok) throw new Error("ამინდის მოთხოვნა წარუმატებელია");
+      const data = await res.json();
 
-    // Fetch and fill data
-    cities.forEach(async (city, idx) => {
-      try {
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city.query}&units=metric&lang=ka&appid=${apiKey}`);
-        const data = await res.json();
-        const { temp, humidity, pressure } = data.main;
-        const desc = data.weather[0].description;
-        const wind = data.wind.speed;
-        const clouds = data.clouds.all;
-        const icon = data.weather[0].icon;
-        const { lat, lon } = data.coord;
+      const { temp, pressure, humidity } = data.main;
+      const desc = data.weather[0].description;
+      const wind = data.wind.speed;
+      const { lat, lon } = data.coord;
 
-        const oneRes = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=ka&appid=${apiKey}`);
-        const one = await oneRes.json();
+      const oneRes = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=ka&appid=${apiKey}`);
+      if (!oneRes.ok) throw new Error("პროგნოზის მოთხოვნა წარუმატებელია");
+      const oneData = await oneRes.json();
 
-        // Build HTML
-        let html = `
-          <div class="city-card">
-            <div class="city-header">
-              <div class="city-name">${city.name}</div>
-              <div class="temp">
-                <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="${desc}"/>
-                ${Math.round(temp)}°C
-              </div>
-            </div>
-            <div class="desc">${desc}</div>
-            <div class="details">
-              ტენიანობა: ${humidity}%<br>
-              ქარი: ${wind} მ/წ<br>
-              წნევა: ${pressure} hPa<br>
-              ღრუბლიანობა: ${clouds}%<br>
-              UV ინდექსი: ${one.current.uvi}
-            </div>
-            <div class="rating">დღის შეფასება: ${rateFishing({ wind, clouds, tempDay: one.current.temp, pop: one.current.pop || 0 })}</div>
-            <table>
-              <thead>
+      const rating = rateFishingConditions(temp, wind, pressure);
+
+      card.innerHTML = `
+        <div class="city-header">
+          <div class="city-name">${city.name}</div>
+          <div class="temp">${Math.round(temp)}°C</div>
+        </div>
+        <div class="desc">${desc}</div>
+        <div class="details">
+          ქარი: ${wind} მ/წ<br>
+          წნევა: ${pressure} hPa<br>
+          ტენიანობა: ${humidity}%
+        </div>
+        <div class="rating">${rating}</div>
+        <table>
+          <thead>
+            <tr>
+              <th>თარიღი</th>
+              <th>დღე</th>
+              <th>ღამე</th>
+              <th>ქარი</th>
+              <th>წნევა</th>
+              <th>ტენიანობა</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${oneData.daily.slice(1, 6).map(day => {
+              const date = new Date(day.dt * 1000).toLocaleDateString('ka-GE');
+              return `
                 <tr>
-                  <th>თარიღი</th>
-                  <th>დღის ტემპ.</th>
-                  <th>ღამის ტემპ.</th>
-                  <th>ქარი</th>
-                  <th>ღრუბლები</th>
-                  <th>ტენიანობა</th>
-                  <th>UV</th>
-                  <th>შეფასება</th>
+                  <td>${date}</td>
+                  <td>${Math.round(day.temp.day)}°C</td>
+                  <td>${Math.round(day.temp.night)}°C</td>
+                  <td>${day.wind_speed} მ/წ</td>
+                  <td>${day.pressure} hPa</td>
+                  <td>${day.humidity}%</td>
                 </tr>
-              </thead>
-              <tbody>
-                ${one.daily.slice(1, 6).map(day => {
-                  const dt = new Date(day.dt * 1000).toLocaleDateString('ka-GE');
-                  const rating = rateFishing({
-                    wind: day.wind_speed,
-                    clouds: day.clouds,
-                    tempDay: day.temp.day,
-                    pop: day.pop
-                  });
-                  return `
-                    <tr>
-                      <td>${dt}</td>
-                      <td>${Math.round(day.temp.day)}°C</td>
-                      <td>${Math.round(day.temp.night)}°C</td>
-                      <td>${day.wind_speed}</td>
-                      <td>${day.clouds}%</td>
-                      <td>${day.humidity}%</td>
-                      <td>${day.uvi}</td>
-                      <td>${rating}</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
-        `;
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    } catch (err) {
+      console.error(err);
+      card.innerHTML = `
+        <div class="city-name">${city.name}</div>
+        <div class="desc error">შეცდომა: ვერ ჩაიტვირთა მონაცემები</div>
+      `;
+    }
+  });
+</script>
 
-        document.getElementById(`content-${idx}`).innerHTML = html;
-      } catch (err) {
-        document.getElementById(`content-${idx}`).innerHTML =
-          `<div class="city-card"><div class="desc error">შეცდომა: ვერ ჩაიტვირთა</div></div>`;
-      }
-    });
-  </script>
 </body>
 </html>
