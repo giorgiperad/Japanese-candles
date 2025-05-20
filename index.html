@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ამინდის პროგნოზი - მრავალი ლოკაცია</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .weather-card {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .weather-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .weather-icon {
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+    .tab {
+      background: rgba(255, 255, 255, 0.1);
+      transition: background 0.2s ease;
+    }
+    .tab.active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    .forecast-card {
+      background: rgba(255, 255, 255, 0.1);
+      transition: transform 0.2s ease;
+    }
+    .forecast-card:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="weather-card text-white p-6 rounded-xl shadow-lg max-w-2xl w-full">
+    <h2 class="text-2xl font-bold mb-4 text-center">ამინდის პროგნოზი</h2>
+    <!-- Tabs for locations -->
+    <div class="flex flex-wrap justify-center gap-2 mb-4">
+      <button class="tab px-4 py-2 rounded-lg text-sm font-medium active" onclick="switchLocation('darkha')">დარყა</button>
+      <button class="tab px-4 py-2 rounded-lg text-sm font-medium" onclick="switchLocation('sion')">სიონი</button>
+      <button class="tab px-4 py-2 rounded-lg text-sm font-medium" onclick="switchLocation('tsalka')">წალკა</button>
+      <button class="tab px-4 py-2 rounded-lg text-sm font-medium" onclick="switchLocation('bazaleti')">ბაზალეთი</button>
+      <button class="tab px-4 py-2 rounded-lg text-sm font-medium" onclick="switchLocation('tbilisi')">თბილისი</button>
+      <button class="tab px-4 py-2 rounded-lg text-sm font-medium" onclick="switchLocation('rustavi')">რუსთავი</button>
+    </div>
+    <!-- Current Weather -->
+    <div id="current-weather" class="text-center mb-6">
+      <img id="weather-icon" class="weather-icon mx-auto mb-4" src="" alt="Weather Icon" width="80">
+      <p id="temperature" class="text-4xl font-semibold mb-2">-- °C</p>
+      <p id="description" class="text-lg capitalize mb-2">--</p>
+      <p id="humidity" class="text-sm">ტენიანობა: --%</p>
+      <p id="wind" class="text-sm">ქარი: -- მ/წ</p>
+    </div>
+    <!-- 7-Day Forecast -->
+    <h3 class="text-lg font-semibold mb-2 text-center">7-დღიანი პროგნოზი</h3>
+    <div id="forecast" class="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-auto max-h-64 p-2">
+      <!-- Forecast cards will be populated here -->
+    </div>
+    <p class="text-xs text-center mt-4 opacity-75">მონაცემები OpenWeatherMap-ისგან. 10-დღიანი პროგნოზისთვის საჭიროა ფასიანი API.</p>
+  </div>
+
+  <script>
+    const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
+    const locations = {
+      darkha: { name: 'დარყა', lat: 42.3167, lon: 42.9667 },
+      sion: { name: 'სიონი', lat: 41.6333, lon: 44.0833 },
+      tsalka: { name: 'წალკა', lat: 41.5946, lon: 44.0891 },
+      bazaleti: { name: 'ბაზალეთი', lat: 42.0833, lon: 44.6833 },
+      tbilisi: { name: 'თბილისი', lat: 41.6941, lon: 44.8337 },
+      rustavi: { name: 'რუსთავი', lat: 41.5495, lon: 44.9932 }
+    };
+    let currentLocation = 'darkha';
+
+    async function fetchCurrentWeather(lat, lon) {
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=ka`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        document.getElementById('temperature').textContent = `${Math.round(data.main.temp)} °C`;
+        document.getElementById('description').textContent = data.weather[0].description;
+        document.getElementById('humidity').textContent = `ტენიანობა: ${data.main.humidity}%`;
+        document.getElementById('wind').textContent = `ქარი: ${data.wind.speed} მ/წ`;
+        document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+      } catch (error) {
+        console.error('Error fetching current weather:', error);
+        document.getElementById('current-weather').innerHTML = '<p class="text-red-300">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა</p>';
+      }
+    }
+
+    async function fetchForecast(lat, lon) {
+      // Note: Free API provides 5-day hourly forecast; 7-day requires paid API. Simulating with daily data.
+      const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=ka`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        const dailyData = data.list.filter((_, index) => index % 8 === 0).slice(0, 7); // Approximate daily data
+        const forecastDiv = document.getElementById('forecast');
+        forecastDiv.innerHTML = '';
+        dailyData.forEach(day => {
+          const date = new Дата(day.dt * 1000).toLocaleDateString('ka-GE', { weekday: 'short', day: 'numeric', month: 'short' });
+          const card = `
+            <div class="forecast-card p-4 rounded-lg text-center">
+              <p class="font-medium">${date}</p>
+              <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png" alt="Weather Icon" class="mx-auto my-2" width="50">
+              <p>${Math.round(day.main.temp)} °C</p>
+              <p class="text-sm capitalize">${day.weather[0].description}</p>
+            </div>
+          `;
+          forecastDiv.innerHTML += card;
+        });
+      } catch (error) {
+        console.error('Error fetching forecast:', error);
+        document.getElementById('forecast').innerHTML = '<p class="text-red-300">ვერ მოხერხდა პროგნოზის ჩატვირთვა</p>';
+      }
+    }
+
+    function switchLocation(location) {
+      currentLocation = location;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`button[onclick="switchLocation('${location}')"]`).classList.add('active');
+      const { lat, lon } = locations[location];
+      fetchCurrentWeather(lat, lon);
+      fetchForecast(lat, lon);
+    }
+
+    // Initialize with Darkha
+    fetchCurrentWeather(locations.darkha.lat, locations.darkha.lon);
+    fetchForecast(locations.darkha.lat, locations.darkha.lon);
+  </script>
+</body>
+</html>
