@@ -1,183 +1,741 @@
 <!DOCTYPE html>
 <html lang="ka">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>სათევზაო ამინდის პროგნოზი</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to bottom, #e0f7fa, #b2ebf2);
-      color: #006064;
-    }
-    header {
-      background: #004d40;
-      color: #e0f2f1;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.8rem;
-      letter-spacing: 1px;
-    }
-    .weather-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1rem;
-    }
-    .city-card {
-      background: #ffffffcc;
-      border-radius: 16px;
-      padding: 1rem;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-    .city-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    .city-name {
-      font-size: 1.3rem;
-      font-weight: bold;
-    }
-    .temp {
-      font-size: 2rem;
-      color: #00796b;
-    }
-    .desc {
-      font-style: italic;
-      color: #555;
-    }
-    .details {
-      font-size: 0.9rem;
-      color: #333;
-      margin-top: 0.5rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.5rem;
-    }
-    th, td {
-      padding: 0.5rem;
-      text-align: center;
-      border: 1px solid #b2dfdb;
-    }
-    th {
-      background: #004d40;
-      color: #e0f2f1;
-    }
-    .rating {
-      font-weight: bold;
-      margin-top: 0.5rem;
-      color: #004d40;
-    }
-    .error {
-      color: #b71c1c;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>თევზაობის ამინდის პროგნოზი - საქართველო</title>
+    <style>
+        :root {
+            --primary-color: #1a73e8;
+            --secondary-color: #4285f4;
+            --bg-color: #f8f9fa;
+            --text-color: #202124;
+            --border-color: #dadce0;
+            --good-fishing: #4caf50;
+            --moderate-fishing: #ff9800;
+            --poor-fishing: #f44336;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 2rem;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        nav {
+            background-color: white;
+            padding: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .location-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .location-tab {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            background-color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .location-tab:hover {
+            background-color: #e8f0fe;
+        }
+        
+        .location-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .day-tabs {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .day-tab {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            background-color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .day-tab:hover {
+            background-color: #e8f0fe;
+        }
+        
+        .day-tab.active {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .location-section {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .location-section.active {
+            display: block;
+        }
+        
+        .day-section {
+            display: none;
+            margin-top: 1rem;
+        }
+        
+        .day-section.active {
+            display: block;
+        }
+        
+        .weather-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .weather-table th,
+        .weather-table td {
+            padding: 0.75rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .weather-table th {
+            background-color: var(--secondary-color);
+            color: white;
+            position: sticky;
+            top: 43px;
+        }
+        
+        .weather-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .weather-table tr:hover {
+            background-color: #e8f0fe;
+        }
+        
+        .solunar-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .solunar-periods {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .solunar-period {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: #e8f0fe;
+            border: 1px solid var(--border-color);
+        }
+        
+        .fishing-optimal {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        
+        .fishing-moderate {
+            background-color: rgba(255, 152, 0, 0.2);
+        }
+        
+        .fishing-poor {
+            background-color: rgba(244, 67, 54, 0.1);
+        }
+        
+        .fishing-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .indicator-optimal {
+            background-color: var(--good-fishing);
+        }
+        
+        .indicator-moderate {
+            background-color: var(--moderate-fishing);
+        }
+        
+        .indicator-poor {
+            background-color: var(--poor-fishing);
+        }
+        
+        .legend {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .weather-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+        }
+        
+        .wind-direction {
+            display: inline-block;
+            transform-origin: center;
+        }
+        
+        @media (max-width: 768px) {
+            .weather-table {
+                font-size: 0.85rem;
+            }
+            
+            .weather-table th,
+            .weather-table td {
+                padding: 0.5rem 0.25rem;
+            }
+            
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .solunar-periods {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<header>სათევზაო ამინდის პროგნოზი</header>
-<div class="weather-container" id="weatherContainer"></div>
-
-<script>
-  const apiKey = "b5f3b44e0ff36c689aa09e1c5f227d6d";
-  const cities = [
-    { name: "თბილისი", query: "Tbilisi,GE" },
-    { name: "სიონი", query: "Sioni,GE" },
-    { name: "წალკა", query: "Tsalka,GE" },
-    { name: "ბაზალეთი", query: "Bazaleti,GE" },
-    { name: "ნადარბაზევი", query: "Nadarbazevi,GE" },
-    { name: "რუსთავი", query: "Rustavi,GE" }
-  ];
-  const container = document.getElementById("weatherContainer");
-
-  function rateFishingConditions(temp, wind, pressure) {
-    if (temp > 5 && temp < 25 && wind < 5 && pressure > 1010 && pressure < 1025) {
-      return "შესანიშნავი პირობები თევზაობისთვის";
-    } else if (wind > 8 || pressure < 1000) {
-      return "არასახარბიელო პირობები";
-    } else {
-      return "საშუალო პირობები";
-    }
-  }
-
-  cities.forEach(async city => {
-    const card = document.createElement("div");
-    card.className = "city-card";
-    card.innerHTML = `<div class="city-name">${city.name}</div><div class="desc">იტვირთება...</div>`;
-    container.appendChild(card);
-
-    try {
-      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city.query}&units=metric&lang=ka&appid=${apiKey}`);
-      if (!res.ok) throw new Error("ამინდის მოთხოვნა წარუმატებელია");
-      const data = await res.json();
-
-      const { temp, pressure, humidity } = data.main;
-      const desc = data.weather[0].description;
-      const wind = data.wind.speed;
-      const { lat, lon } = data.coord;
-
-      const oneRes = await fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&units=metric&lang=ka&appid=${apiKey}`);
-      if (!oneRes.ok) throw new Error("პროგნოზის მოთხოვნა წარუმატებელია");
-      const oneData = await oneRes.json();
-
-      const rating = rateFishingConditions(temp, wind, pressure);
-
-      card.innerHTML = `
-        <div class="city-header">
-          <div class="city-name">${city.name}</div>
-          <div class="temp">${Math.round(temp)}°C</div>
+    <header>
+        <h1>თევზაობის ამინდის პროგნოზი</h1>
+        <p>20 მაისი, 2025 - 24 მაისი, 2025</p>
+    </header>
+    
+    <nav>
+        <div class="location-tabs">
+            <button class="location-tab active" data-location="tbilisi">თბილისი</button>
+            <button class="location-tab" data-location="sioni">სიონი</button>
+            <button class="location-tab" data-location="tsalka">წალკა</button>
+            <button class="location-tab" data-location="bazaleti">ბაზალეთი</button>
+            <button class="location-tab" data-location="nadarbazevi">ნადარბაზევი</button>
         </div>
-        <div class="desc">${desc}</div>
-        <div class="details">
-          ქარი: ${wind} მ/წ<br>
-          წნევა: ${pressure} hPa<br>
-          ტენიანობა: ${humidity}%
+        
+        <div class="day-tabs">
+            <button class="day-tab active" data-day="1">20 მაისი</button>
+            <button class="day-tab" data-day="2">21 მაისი</button>
+            <button class="day-tab" data-day="3">22 მაისი</button>
+            <button class="day-tab" data-day="4">23 მაისი</button>
+            <button class="day-tab" data-day="5">24 მაისი</button>
         </div>
-        <div class="rating">${rating}</div>
-        <table>
-          <thead>
-            <tr>
-              <th>თარიღი</th>
-              <th>დღე</th>
-              <th>ღამე</th>
-              <th>ქარი</th>
-              <th>წნევა</th>
-              <th>ტენიანობა</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${oneData.daily.slice(1, 6).map(day => {
-              const date = new Date(day.dt * 1000).toLocaleDateString('ka-GE');
-              return `
-                <tr>
-                  <td>${date}</td>
-                  <td>${Math.round(day.temp.day)}°C</td>
-                  <td>${Math.round(day.temp.night)}°C</td>
-                  <td>${day.wind_speed} მ/წ</td>
-                  <td>${day.pressure} hPa</td>
-                  <td>${day.humidity}%</td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      `;
-    } catch (err) {
-      console.error(err);
-      card.innerHTML = `
-        <div class="city-name">${city.name}</div>
-        <div class="desc error">შეცდომა: ვერ ჩაიტვირთა მონაცემები</div>
-      `;
-    }
-  });
-</script>
-
-</body>
-</html>
+    </nav>
+    
+    <div class="container">
+        <!-- Tbilisi Section -->
+        <section id="tbilisi" class="location-section active">
+            <h2>თბილისი - ამინდის პროგნოზი</h2>
+            
+            <div class="day-section active" data-day="1">
+                <h3>20 მაისი, 2025</h3>
+                <table class="weather-table">
+                    <thead>
+                        <tr>
+                            <th>საათი</th>
+                            <th>ტემპერატურა (°C)</th>
+                            <th>ქარი (კმ/სთ)</th>
+                            <th>მიმართულება</th>
+                            <th>ნალექის ალბათობა (%)</th>
+                            <th>ნალექის რაოდენობა (მმ)</th>
+                            <th>ტენიანობა (%)</th>
+                            <th>ღრუბლიანობა (%)</th>
+                            <th>წნევა (hPa)</th>
+                            <th>UV ინდექსი</th>
+                            <th>თევზაობის პირობები</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>00:00</td>
+                            <td>18</td>
+                            <td>5</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>65</td>
+                            <td>20</td>
+                            <td>1015</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr>
+                            <td>01:00</td>
+                            <td>17</td>
+                            <td>4</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>70</td>
+                            <td>15</td>
+                            <td>1015</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr class="fishing-optimal">
+                            <td>02:00</td>
+                            <td>16</td>
+                            <td>3</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>75</td>
+                            <td>10</td>
+                            <td>1014</td>
+                            <td>0</td>
+                            <td><span class="fishing-indicator indicator-optimal"></span>საუკეთესო</td>
+                        </tr>
+                        <tr class="fishing-optimal">
+                            <td>03:00</td>
+                            <td>15</td>
+                            <td>3</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>80</td>
+                            <td>5</td>
+                            <td>1014</td>
+                            <td>0</td>
+                            <td><span class="fishing-indicator indicator-optimal"></span>საუკეთესო</td>
+                        </tr>
+                        <tr>
+                            <td>04:00</td>
+                            <td>15</td>
+                            <td>2</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>80</td>
+                            <td>5</td>
+                            <td>1013</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr>
+                            <td>05:00</td>
+                            <td>14</td>
+                            <td>2</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>80</td>
+                            <td>5</td>
+                            <td>1013</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr>
+                            <td>06:00</td>
+                            <td>16</td>
+                            <td>3</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>75</td>
+                            <td>10</td>
+                            <td>1014</td>
+                            <td>1</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>07:00</td>
+                            <td>18</td>
+                            <td>4</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>70</td>
+                            <td>15</td>
+                            <td>1014</td>
+                            <td>2</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>08:00</td>
+                            <td>20</td>
+                            <td>5</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>65</td>
+                            <td>20</td>
+                            <td>1015</td>
+                            <td>3</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>09:00</td>
+                            <td>22</td>
+                            <td>6</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>60</td>
+                            <td>25</td>
+                            <td>1015</td>
+                            <td>5</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>10:00</td>
+                            <td>24</td>
+                            <td>8</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>55</td>
+                            <td>30</td>
+                            <td>1015</td>
+                            <td>6</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>11:00</td>
+                            <td>26</td>
+                            <td>10</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>50</td>
+                            <td>35</td>
+                            <td>1014</td>
+                            <td>7</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>12:00</td>
+                            <td>27</td>
+                            <td>12</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>45</td>
+                            <td>40</td>
+                            <td>1013</td>
+                            <td>8</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>13:00</td>
+                            <td>28</td>
+                            <td>12</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>40</td>
+                            <td>35</td>
+                            <td>1012</td>
+                            <td>8</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr>
+                            <td>14:00</td>
+                            <td>28</td>
+                            <td>12</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>5</td>
+                            <td>0</td>
+                            <td>40</td>
+                            <td>40</td>
+                            <td>1012</td>
+                            <td>7</td>
+                            <td class="fishing-poor"><span class="fishing-indicator indicator-poor"></span>ცუდი</td>
+                        </tr>
+                        <tr class="fishing-optimal">
+                            <td>15:00</td>
+                            <td>27</td>
+                            <td>10</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>45</td>
+                            <td>45</td>
+                            <td>1011</td>
+                            <td>6</td>
+                            <td><span class="fishing-indicator indicator-optimal"></span>საუკეთესო</td>
+                        </tr>
+                        <tr class="fishing-optimal">
+                            <td>16:00</td>
+                            <td>26</td>
+                            <td>8</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>15</td>
+                            <td>0</td>
+                            <td>50</td>
+                            <td>50</td>
+                            <td>1011</td>
+                            <td>5</td>
+                            <td><span class="fishing-indicator indicator-optimal"></span>საუკეთესო</td>
+                        </tr>
+                        <tr>
+                            <td>17:00</td>
+                            <td>25</td>
+                            <td>6</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>20</td>
+                            <td>0</td>
+                            <td>55</td>
+                            <td>55</td>
+                            <td>1012</td>
+                            <td>4</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr>
+                            <td>18:00</td>
+                            <td>23</td>
+                            <td>5</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>25</td>
+                            <td>0</td>
+                            <td>60</td>
+                            <td>50</td>
+                            <td>1012</td>
+                            <td>3</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr>
+                            <td>19:00</td>
+                            <td>21</td>
+                            <td>4</td>
+                            <td><span class="wind-direction">↑</span></td>
+                            <td>30</td>
+                            <td>0</td>
+                            <td>65</td>
+                            <td>45</td>
+                            <td>1013</td>
+                            <td>1</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr>
+                            <td>20:00</td>
+                            <td>20</td>
+                            <td>3</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>30</td>
+                            <td>0</td>
+                            <td>70</td>
+                            <td>40</td>
+                            <td>1013</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <tr class="fishing-optimal">
+                            <td>21:00</td>
+                            <td>19</td>
+                            <td>3</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>20</td>
+                            <td>0</td>
+                            <td>75</td>
+                            <td>35</td>
+                            <td>1014</td>
+                            <td>0</td>
+                            <td><span class="fishing-indicator indicator-optimal"></span>საუკეთესო</td>
+                        </tr>
+                        <tr class="fishing-optimal">
+                            <td>22:00</td>
+                            <td>18</td>
+                            <td>2</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>15</td>
+                            <td>0</td>
+                            <td>75</td>
+                            <td>30</td>
+                            <td>1014</td>
+                            <td>0</td>
+                            <td><span class="fishing-indicator indicator-optimal"></span>საუკეთესო</td>
+                        </tr>
+                        <tr>
+                            <td>23:00</td>
+                            <td>17</td>
+                            <td>2</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>80</td>
+                            <td>25</td>
+                            <td>1014</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="solunar-info">
+                    <h3>სოლუნარული ინფორმაცია - 20 მაისი</h3>
+                    <div class="solunar-periods">
+                        <div class="solunar-period">
+                            <h4>ძირითადი აქტიურობის პერიოდები</h4>
+                            <p>02:15 - 04:15</p>
+                            <p>15:30 - 17:30</p>
+                        </div>
+                        <div class="solunar-period">
+                            <h4>მეორადი აქტიურობის პერიოდები</h4>
+                            <p>09:00 - 10:00</p>
+                            <p>21:00 - 22:00</p>
+                        </div>
+                        <div class="solunar-period">
+                            <h4>მთვარის ფაზა</h4>
+                            <p>მოკლებადი მთვარე</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="fishing-indicator indicator-optimal"></span>
+                        <span>საუკეთესო პირობები</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="fishing-indicator indicator-moderate"></span>
+                        <span>საშუალო პირობები</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="fishing-indicator indicator-poor"></span>
+                        <span>ცუდი პირობები</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section" data-day="2">
+                <h3>21 მაისი, 2025</h3>
+                <table class="weather-table">
+                    <thead>
+                        <tr>
+                            <th>საათი</th>
+                            <th>ტემპერატურა (°C)</th>
+                            <th>ქარი (კმ/სთ)</th>
+                            <th>მიმართულება</th>
+                            <th>ნალექის ალბათობა (%)</th>
+                            <th>ნალექის რაოდენობა (მმ)</th>
+                            <th>ტენიანობა (%)</th>
+                            <th>ღრუბლიანობა (%)</th>
+                            <th>წნევა (hPa)</th>
+                            <th>UV ინდექსი</th>
+                            <th>თევზაობის პირობები</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>00:00</td>
+                            <td>17</td>
+                            <td>3</td>
+                            <td><span class="wind-direction">↓</span></td>
+                            <td>10</td>
+                            <td>0</td>
+                            <td>80</td>
+                            <td>20</td>
+                            <td>1015</td>
+                            <td>0</td>
+                            <td class="fishing-moderate"><span class="fishing-indicator indicator-moderate"></span>საშუალო</td>
+                        </tr>
+                        <!-- Additional hours would be added here -->
+                    </tbody>
+                </table>
+                
+                <div class="solunar-info">
+                    <h3>სოლუნარული ინფორმაცია - 21 მაისი</h3>
+                    <div class="solunar-periods">
+                        <div class="solunar-period">
+                            <h4>ძირითადი აქტიურობის პერიოდები</h4>
+                            <p>03:00 - 05:00</p>
+                            <p>16:15 - 18:15</p>
+                        </div>
+                        <div class="solunar-period">
+                            <h4>მეორადი აქტიურობის პერიოდები</h4>
+                            <p>09:45 - 10:45</p>
+                            <p>21:45 - 22:45</p>
+                        </div>
+                        <div class="solunar-period">
+                            <h4>მთვარის ფაზა</h4>
+                            <p>მოკლებადი მთვარე</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="day-section" data-day="3">
+                <h3>22 მაისი, 2025</h3>
+                <!-- Similar structure as day 1 and 2 -->
+                <p>ინფორმაცია მზადდება...</p>
+            </div>
+            
+            <div class="day-section" data-day="4">
+                <h3>23 მაისი, 2025</h3>
+                <!-- Similar structure as day 1 and 2 -->
+                <p>ინფორმაცია მზადდება...</p>
+            </div>
+            
+            <div class="day-section" data-day="5">
+                <h3>24 მაისი, 2025</h3>
+                <!-- Similar structure as day 1 and 2 -->
+                <p>ინფორმაცია მზადდება...</p>
+            </div>
+        </section>
+        
+        <!-- Sioni Section -->
+        <section id="sioni" class="location-section">
+            <h2>სიონი - ამინდის პროგნოზი</h2>
