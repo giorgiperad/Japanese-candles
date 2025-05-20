@@ -25,7 +25,7 @@
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,90 Q25,70 50,90 T100,90 V100 H0 Z" fill="rgba(16, 185, 129, 0.1)"/></svg>') repeat-x bottom;
       opacity: 0.3;
     }
-    .tab, .day-tab {
+    .tab, .view-tab, .day-tab {
       background: rgba(255, 255, 255, 0.05);
       color: #e2e8f0;
       padding: 8px 12px;
@@ -37,13 +37,13 @@
       text-align: center;
       position: relative;
     }
-    .tab.active, .day-tab.active {
+    .tab.active, .view-tab.active, .day-tab.active {
       background: rgba(59, 130, 246, 0.2);
       color: #00ddeb;
       border: 1px solid #00ddeb;
       box-shadow: 0 0 8px rgba(0, 221, 235, 0.4);
     }
-    .tab:hover, .day-tab:hover {
+    .tab:hover, .view-tab:hover, .day-tab:hover {
       background: rgba(255, 255, 255, 0.08);
       box-shadow: 0 0 6px rgba(236, 72, 153, 0.2);
       transform: translateY(-2px);
@@ -62,6 +62,22 @@
     .weather-card:hover {
       box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
     }
+    .hourly-forecast {
+      max-height: 300px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #00ddeb rgba(255, 255, 255, 0.1);
+    }
+    .hourly-forecast::-webkit-scrollbar {
+      width: 6px;
+    }
+    .hourly-forecast::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .hourly-forecast::-webkit-scrollbar-thumb {
+      background: #00ddeb;
+      border-radius: 3px;
+    }
     .header-icon {
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300ddeb"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-2-10h4l2 4h-4l-2-4z"/></svg>') no-repeat center;
       background-size: 28px;
@@ -79,7 +95,7 @@
       font-family: 'Roboto', sans-serif;
     }
     @media (max-width: 640px) {
-      .tab, .day-tab {
+      .tab, .view-tab, .day-tab {
         padding: 6px 10px;
         font-size: 0.8rem;
       }
@@ -99,18 +115,24 @@
   <div class="weather-container text-white p-4 w-full max-w-md mx-4">
     <h1 class="text-xl font-bold mb-4 text-center flex items-center justify-center">
       <span class="header-icon w-7 h-7 mr-2"></span>
-      სათევზაო ამინდი (20 მაისი, 2025)
+      სათევზაო ამინდი (20 მაისი, 2025, 17:31)
     </h1>
     <!-- Location Tabs -->
     <div class="flex flex-wrap justify-center gap-1 mb-4">
-      <button class="tab active" onclick="switchLocation('sion', 0)"><span class="fishing-icon"></span>სიონი</button>
-      <button class="tab" onclick="switchLocation('tsalka', 0)"><span class="fishing-icon"></span>წალკა</button>
-      <button class="tab" onclick="switchLocation('bazaleti', 0)"><span class="fishing-icon"></span>ბაზალეთი</button>
-      <button class="tab" onclick="switchLocation('tbilisi', 0)"><span class="fishing-icon"></span>თბილისი</button>
-      <button class="tab" onclick="switchLocation('rustavi', 0)"><span class="fishing-icon"></span>რუსთავი</button>
+      <button class="tab active" onclick="switchLocation('sion', 'current')"><span class="fishing-icon"></span>სიონი</button>
+      <button class="tab" onclick="switchLocation('tsalka', 'current')"><span class="fishing-icon"></span>წალკა</button>
+      <button class="tab" onclick="switchLocation('bazaleti', 'current')"><span class="fishing-icon"></span>ბაზალეთი</button>
+      <button class="tab" onclick="switchLocation('tbilisi', 'current')"><span class="fishing-icon"></span>თბილისი</button>
+      <button class="tab" onclick="switchLocation('rustavi', 'current')"><span class="fishing-icon"></span>რუსთავი</button>
     </div>
-    <!-- Day Tabs -->
-    <div class="flex flex-wrap justify-center gap-1 mb-4" id="day-tabs">
+    <!-- View Tabs -->
+    <div class="flex flex-wrap justify-center gap-1 mb-4">
+      <button class="view-tab active" onclick="switchView('current')">მიმდინარე</button>
+      <button class="view-tab" onclick="switchView('hourly')">12-საათიანი</button>
+      <button class="view-tab" onclick="switchView('daily')">5-დღიანი</button>
+    </div>
+    <!-- Day Tabs (for daily forecast) -->
+    <div class="flex flex-wrap justify-center gap-1 mb-4 hidden" id="day-tabs">
       <!-- Day tabs will be populated dynamically -->
     </div>
     <!-- Weather Content -->
@@ -124,7 +146,7 @@
       <p id="gust" class="text-sm">ქარის ნაკადი: --</p>
       <p id="fishing-tip" class="text-sm font-semibold text-cyan-300 mt-2">--</p>
     </div>
-    <p class="text-xs text-center mt-4 opacity-75">მონაცემები AccuWeather-ისგან. 7-დღიანი პროგნოზი მიახლოებითია; სრული პროგნოზისთვის საჭიროა Enterprise API.</p>
+    <p class="text-xs text-center mt-4 opacity-75">მონაცემები AccuWeather-ისგან. API შეზღუდულია 50 გამოძახებით დღეში.</p>
   </div>
 
   <script>
@@ -137,8 +159,9 @@
       rustavi: { name: 'რუსთავი', query: 'Rustavi', lat: 41.5495, lon: 44.9932, locationKey: null }
     };
     let currentLocation = 'sion';
+    let currentView = 'current';
     let currentDay = 0; // 0 for current weather, 1-5 for forecast days
-    let forecastData = [];
+    let forecastData = { hourly: [], daily: [] };
 
     function degreesToDirection(degrees) {
       const directions = ['ჩ', 'ჩღ', 'ღ', 'ღა', 'ა', 'სა', 'ს', 'სდ', 'დ', 'დჩ', 'ჩ'];
@@ -156,7 +179,7 @@
       }
     }
 
-    async function getLocationKey(query, lat, lon) {
+    async function getLocationKey(lat, lon) {
       const apiUrl = `http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${apiKey}&q=${lat},${lon}&language=ka-GE`;
       try {
         const response = await fetch(apiUrl);
@@ -181,32 +204,47 @@
       }
     }
 
-    async function fetchForecast(locationKey) {
+    async function fetchHourlyForecast(locationKey) {
+      const apiUrl = `http://dataservice.accuweather.com/forecasts/v1/hourly/12hour/${locationKey}?apikey=${apiKey}&details=true&metric=true&language=ka-GE`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching hourly forecast:', error);
+        return [];
+      }
+    }
+
+    async function fetchDailyForecast(locationKey) {
       const apiUrl = `http://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey}&details=true&metric=true&language=ka-GE`;
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        // Extend to 7 days by repeating last day's data
-        const lastDay = data.DailyForecasts[data.DailyForecasts.length - 1];
-        return [...data.DailyForecasts, lastDay, lastDay];
+        return data.DailyForecasts;
       } catch (error) {
-        console.error('Error fetching forecast:', error);
+        console.error('Error fetching daily forecast:', error);
         return [];
       }
     }
 
     async function initializeLocationKeys() {
       for (const loc in locations) {
-        locations[loc].locationKey = await getLocationKey(locations[loc].query, locations[loc].lat, locations[loc].lon);
+        locations[loc].locationKey = await getLocationKey(locations[loc].lat, locations[loc].lon);
       }
     }
 
     function updateDayTabs() {
       const dayTabs = document.getElementById('day-tabs');
+      if (currentView !== 'daily') {
+        dayTabs.classList.add('hidden');
+        return;
+      }
+      dayTabs.classList.remove('hidden');
       dayTabs.innerHTML = `
         <button class="day-tab ${currentDay === 0 ? 'active' : ''}" onclick="switchDay(0)">დღეს</button>
-        ${forecastData.map((_, index) => `
+        ${forecastData.daily.map((_, index) => `
           <button class="day-tab ${currentDay === index + 1 ? 'active' : ''}" onclick="switchDay(${index + 1})">
             ${new Date(_.Date).toLocaleDateString('ka-GE', { weekday: 'short', day: 'numeric', month: 'short' })}
           </button>
@@ -214,26 +252,25 @@
       `;
     }
 
-    async function displayWeather(location, dayIndex) {
+    async function displayWeather(location, view, dayIndex) {
       const contentDiv = document.getElementById('weather-content');
-      contentDiv.innerHTML = `
-        <img id="weather-icon" class="weather-icon mx-auto mb-3" src="" alt="Weather Icon" width="50">
-        <p id="temperature" class="text-4xl font-semibold mb-2">-- °C</p>
-        <p id="clouds" class="text-sm">ღრუბლიანობა: --%</p>
-        <p id="precipitation" class="text-sm">ნალექის ალბათობა: --</p>
-        <p id="pressure" class="text-sm">წნევა: -- hPa</p>
-        <p id="wind" class="text-sm">ქარი: -- მ/წ, --</p>
-        <p id="gust" class="text-sm">ქარის ნაკადი: --</p>
-        <p id="fishing-tip" class="text-sm font-semibold text-cyan-300 mt-2">--</p>
-      `;
-
       const locationKey = locations[location].locationKey;
       if (!locationKey) {
         contentDiv.innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა ლოკაციის განსაზღვრა. გთხოვთ, შეამოწმოთ API გასაღები.</p>';
         return;
       }
 
-      if (dayIndex === 0) {
+      if (view === 'current') {
+        contentDiv.innerHTML = `
+          <img id="weather-icon" class="weather-icon mx-auto mb-3" src="" alt="Weather Icon" width="50">
+          <p id="temperature" class="text-4xl font-semibold mb-2">-- °C</p>
+          <p id="clouds" class="text-sm">ღრუბლიანობა: --%</p>
+          <p id="precipitation" class="text-sm">ნალექის ალბათობა: --</p>
+          <p id="pressure" class="text-sm">წნევა: -- hPa</p>
+          <p id="wind" class="text-sm">ქარი: -- მ/წ, --</p>
+          <p id="gust" class="text-sm">ქარის ნაკადი: --</p>
+          <p id="fishing-tip" class="text-sm font-semibold text-cyan-300 mt-2">--</p>
+        `;
         const data = await fetchCurrentWeather(locationKey);
         if (data && data[0]) {
           const weather = data[0];
@@ -241,7 +278,7 @@
           document.getElementById('clouds').textContent = `ღრუბლიანობა: ${weather.CloudCover || 0}%`;
           document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${weather.PrecipitationProbability || 0}%`;
           document.getElementById('pressure').textContent = `წნევა: ${weather.Pressure.Metric.Value} hPa`;
-          document.getElementById('wind').textContent = `ქარი: ${weather.Wind.Speed.Metric.Value / 3.6} მ/წ, ${degreesToDirection(weather.Wind.Direction.Degrees)}`;
+          document.getElementById('wind').textContent = `ქარი: ${(weather.Wind.Speed.Metric.Value / 3.6).toFixed(1)} მ/წ, ${degreesToDirection(weather.Wind.Direction.Degrees)}`;
           document.getElementById('gust').textContent = `ქარის ნაკადი: ${weather.WindGust.Speed.Metric.Value ? (weather.WindGust.Speed.Metric.Value / 3.6).toFixed(1) + ' მ/წ' : 'მიუწვდომელი'}`;
           document.getElementById('weather-icon').src = `https://www.accuweather.com/images/weathericons/${weather.WeatherIcon}.svg`;
           document.getElementById('fishing-tip').textContent = getFishingTip(
@@ -253,14 +290,52 @@
         } else {
           contentDiv.innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა. გთხოვთ, შეამოწმოთ API გასაღები ან ინტერნეტ კავშირი.</p>';
         }
-      } else {
-        const day = forecastData[dayIndex - 1];
+      } else if (view === 'hourly') {
+        contentDiv.innerHTML = '<div class="hourly-forecast text-sm"></div>';
+        const hourlyDiv = contentDiv.querySelector('.hourly-forecast');
+        const data = forecastData.hourly;
+        if (data.length > 0) {
+          data.forEach(hour => {
+            const time = new Date(hour.DateTime).toLocaleTimeString('ka-GE', { hour: '2-digit', minute: '2-digit' });
+            const card = `
+              <div class="border-b border-gray-700 py-2">
+                <p class="font-medium">${time}</p>
+                <img src="https://www.accuweather.com/images/weathericons/${hour.WeatherIcon}.svg" alt="Weather Icon" class="mx-auto my-1" width="30">
+                <p>${Math.round(hour.Temperature.Value)} °C</p>
+                <p>ღრუბლიანობა: ${hour.CloudCover || 0}%</p>
+                <p>ნალექის ალბ.: ${hour.PrecipitationProbability}%</p>
+                <p>ქარი: ${(hour.Wind.Speed.Value / 3.6).toFixed(1)} მ/წ, ${degreesToDirection(hour.Wind.Direction.Degrees)}</p>
+                <p class="font-semibold text-cyan-300">${getFishingTip(
+                  hour.Temperature.Value,
+                  hour.CloudCover || 0,
+                  hour.Wind.Speed.Value / 3.6,
+                  1013 // Pressure not available in hourly
+                )}</p>
+              </div>
+            `;
+            hourlyDiv.innerHTML += card;
+          });
+        } else {
+          hourlyDiv.innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა საათობრივი პროგნოზის ჩატვირთვა</p>';
+        }
+      } else if (view === 'daily') {
+        contentDiv.innerHTML = `
+          <img id="weather-icon" class="weather-icon mx-auto mb-3" src="" alt="Weather Icon" width="50">
+          <p id="temperature" class="text-4xl font-semibold mb-2">-- °C</p>
+          <p id="clouds" class="text-sm">ღრუბლიანობა: --%</p>
+          <p id="precipitation" class="text-sm">ნალექის ალბათობა: --</p>
+          <p id="pressure" class="text-sm">წნევა: -- hPa</p>
+          <p id="wind" class="text-sm">ქარი: -- მ/წ, --</p>
+          <p id="gust" class="text-sm">ქარის ნაკადი: --</p>
+          <p id="fishing-tip" class="text-sm font-semibold text-cyan-300 mt-2">--</p>
+        `;
+        const day = forecastData.daily[dayIndex - 1];
         if (day) {
           document.getElementById('temperature').textContent = `${Math.round(day.Temperature.Maximum.Value)} °C`;
           document.getElementById('clouds').textContent = `ღრუბლიანობა: ${day.Day.CloudCover || 0}%`;
           document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${day.Day.PrecipitationProbability || 0}%`;
           document.getElementById('pressure').textContent = `წნევა: ${day.AirAndPollen.find(p => p.Name === 'AirPressure')?.Value || 1013} hPa`;
-          document.getElementById('wind').textContent = `ქარი: ${day.Day.Wind.Speed.Value / 3.6} მ/წ, ${degreesToDirection(day.Day.Wind.Direction.Degrees)}`;
+          document.getElementById('wind').textContent = `ქარი: ${(day.Day.Wind.Speed.Value / 3.6).toFixed(1)} მ/წ, ${degreesToDirection(day.Day.Wind.Direction.Degrees)}`;
           document.getElementById('gust').textContent = `ქარის ნაკადი: მიუწვდომელი`;
           document.getElementById('weather-icon').src = `https://www.accuweather.com/images/weathericons/${day.Day.Icon}.svg`;
           document.getElementById('fishing-tip').textContent = getFishingTip(
@@ -275,25 +350,38 @@
       }
     }
 
-    async function switchLocation(location, dayIndex) {
+    async function switchLocation(location, view) {
       currentLocation = location;
-      currentDay = dayIndex;
+      currentView = view;
+      currentDay = 0;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-      document.querySelector(`button[onclick="switchLocation('${location}', ${dayIndex})"]`).classList.add('active');
-      forecastData = await fetchForecast(locations[location].locationKey);
+      document.querySelector(`button[onclick="switchLocation('${location}', '${view}')"]`).classList.add('active');
+      document.querySelectorAll('.view-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
+      forecastData.hourly = await fetchHourlyForecast(locations[location].locationKey);
+      forecastData.daily = await fetchDailyForecast(locations[location].locationKey);
       updateDayTabs();
-      displayWeather(location, dayIndex);
+      displayWeather(location, view, currentDay);
+    }
+
+    async function switchView(view) {
+      currentView = view;
+      currentDay = 0;
+      document.querySelectorAll('.view-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`button[onclick="switchView('${view}')"]`).classList.add('active');
+      updateDayTabs();
+      displayWeather(currentLocation, view, currentDay);
     }
 
     function switchDay(dayIndex) {
       currentDay = dayIndex;
       document.querySelectorAll('.day-tab').forEach(tab => tab.classList.remove('active'));
       document.querySelector(`button[onclick="switchDay(${dayIndex})"]`).classList.add('active');
-      displayWeather(currentLocation, dayIndex);
+      displayWeather(currentLocation, currentView, dayIndex);
     }
 
     // Initialize location keys and start with Sion, current weather
-    initializeLocationKeys().then(() => switchLocation('sion', 0));
+    initializeLocationKeys().then(() => switchLocation('sion', 'current'));
   </script>
 </body>
 </html>
