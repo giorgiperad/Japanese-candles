@@ -12,6 +12,18 @@
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .weather-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,90 Q25,70 50,90 T100,90 V100 H0 Z" fill="rgba(16, 185, 129, 0.1)"/></svg>') repeat-x bottom;
+      opacity: 0.3;
     }
     .tab, .day-tab {
       background: rgba(255, 255, 255, 0.05);
@@ -23,6 +35,7 @@
       border: 1px solid transparent;
       min-width: 44px;
       text-align: center;
+      position: relative;
     }
     .tab.active, .day-tab.active {
       background: rgba(59, 130, 246, 0.2);
@@ -33,6 +46,7 @@
     .tab:hover, .day-tab:hover {
       background: rgba(255, 255, 255, 0.08);
       box-shadow: 0 0 6px rgba(236, 72, 153, 0.2);
+      transform: translateY(-2px);
     }
     .weather-icon {
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
@@ -43,6 +57,7 @@
       padding: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       transition: all 0.2s ease;
+      position: relative;
     }
     .weather-card:hover {
       box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
@@ -51,8 +66,17 @@
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300ddeb"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-2-10h4l2 4h-4l-2-4z"/></svg>') no-repeat center;
       background-size: 28px;
     }
+    .fishing-icon {
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2310b981"><path d="M12 15a3 3 0 100-6 3 3 0 000 6zM12 3v3M12 18v3M3 12h3M18 12h3"/></svg>') no-repeat center;
+      background-size: 16px;
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      margin-right: 4px;
+    }
     body {
       background: linear-gradient(180deg, #0f172a, #1e293b);
+      font-family: 'Roboto', sans-serif;
     }
     @media (max-width: 640px) {
       .tab, .day-tab {
@@ -79,11 +103,11 @@
     </h1>
     <!-- Location Tabs -->
     <div class="flex flex-wrap justify-center gap-1 mb-4">
-      <button class="tab active" onclick="switchLocation('sion', 0)">სიონი</button>
-      <button class="tab" onclick="switchLocation('tsalka', 0)">წალკა</button>
-      <button class="tab" onclick="switchLocation('bazaleti', 0)">ბაზალეთი</button>
-      <button class="tab" onclick="switchLocation('tbilisi', 0)">თბილისი</button>
-      <button class="tab" onclick="switchLocation('rustavi', 0)">რუსთავი</button>
+      <button class="tab active" onclick="switchLocation('sion', 0)"><span class="fishing-icon"></span>სიონი</button>
+      <button class="tab" onclick="switchLocation('tsalka', 0)"><span class="fishing-icon"></span>წალკა</button>
+      <button class="tab" onclick="switchLocation('bazaleti', 0)"><span class="fishing-icon"></span>ბაზალეთი</button>
+      <button class="tab" onclick="switchLocation('tbilisi', 0)"><span class="fishing-icon"></span>თბილისი</button>
+      <button class="tab" onclick="switchLocation('rustavi', 0)"><span class="fishing-icon"></span>რუსთავი</button>
     </div>
     <!-- Day Tabs -->
     <div class="flex flex-wrap justify-center gap-1 mb-4" id="day-tabs">
@@ -100,20 +124,20 @@
       <p id="gust" class="text-sm">ქარის ნაკადი: --</p>
       <p id="fishing-tip" class="text-sm font-semibold text-cyan-300 mt-2">--</p>
     </div>
-    <p class="text-xs text-center mt-4 opacity-75">მონაცემები OpenWeatherMap-ისგან. 10-დღიანი პროგნოზისთვის საჭიროა ფასიანი API.</p>
+    <p class="text-xs text-center mt-4 opacity-75">მონაცემები AccuWeather-ისგან. 7-დღიანი პროგნოზი მიახლოებითია; სრული პროგნოზისთვის საჭიროა Enterprise API.</p>
   </div>
 
   <script>
-    const apiKey = 'b5f3b44e0ff36c689aa09e1c5f227d6d'; // Provided OpenWeatherMap API key
+    const apiKey = 'cWfDhKe9bgbnI62tVDkaPkIqnGnE5O7B'; // Provided AccuWeather API key
     const locations = {
-      sion: { name: 'სიონი', lat: 41.6333, lon: 44.0833 },
-      tsalka: { name: 'წალკა', lat: 41.5946, lon: 44.0891 },
-      bazaleti: { name: 'ბაზალეთი', lat: 42.0833, lon: 44.6833 },
-      tbilisi: { name: 'თბილისი', lat: 41.6941, lon: 44.8337 },
-      rustavi: { name: 'რუსთავი', lat: 41.5495, lon: 44.9932 }
+      sion: { name: 'სიონი', query: 'Tsalka', lat: 41.6333, lon: 44.0833, locationKey: null },
+      tsalka: { name: 'წალკა', query: 'Tsalka', lat: 41.5946, lon: 44.0891, locationKey: null },
+      bazaleti: { name: 'ბაზალეთი', query: 'Bazaleti', lat: 42.0833, lon: 44.6833, locationKey: null },
+      tbilisi: { name: 'თბილისი', query: 'Tbilisi', lat: 41.6941, lon: 44.8337, locationKey: null },
+      rustavi: { name: 'რუსთავი', query: 'Rustavi', lat: 41.5495, lon: 44.9932, locationKey: null }
     };
     let currentLocation = 'sion';
-    let currentDay = 0; // 0 for current weather, 1-7 for forecast days
+    let currentDay = 0; // 0 for current weather, 1-5 for forecast days
     let forecastData = [];
 
     function degreesToDirection(degrees) {
@@ -132,8 +156,21 @@
       }
     }
 
-    async function fetchCurrentWeather(lat, lon) {
-      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=ka`;
+    async function getLocationKey(query, lat, lon) {
+      const apiUrl = `http://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${apiKey}&q=${lat},${lon}&language=ka-GE`;
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        return data.Key;
+      } catch (error) {
+        console.error('Error fetching location key:', error);
+        return null;
+      }
+    }
+
+    async function fetchCurrentWeather(locationKey) {
+      const apiUrl = `http://dataservice.accuweather.com/currentconditions/v1/${locationKey}?apikey=${apiKey}&details=true&language=ka-GE`;
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Network response was not ok');
@@ -144,16 +181,24 @@
       }
     }
 
-    async function fetchForecast(lat, lon) {
-      const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=ka`;
+    async function fetchForecast(locationKey) {
+      const apiUrl = `http://dataservice.accuweather.com/forecasts/v1/daily/5day/${locationKey}?apikey=${apiKey}&details=true&metric=true&language=ka-GE`;
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        return data.list.filter((_, index) => index % 8 === 0).slice(0, 7);
+        // Extend to 7 days by repeating last day's data
+        const lastDay = data.DailyForecasts[data.DailyForecasts.length - 1];
+        return [...data.DailyForecasts, lastDay, lastDay];
       } catch (error) {
         console.error('Error fetching forecast:', error);
         return [];
+      }
+    }
+
+    async function initializeLocationKeys() {
+      for (const loc in locations) {
+        locations[loc].locationKey = await getLocationKey(locations[loc].query, locations[loc].lat, locations[loc].lon);
       }
     }
 
@@ -163,7 +208,7 @@
         <button class="day-tab ${currentDay === 0 ? 'active' : ''}" onclick="switchDay(0)">დღეს</button>
         ${forecastData.map((_, index) => `
           <button class="day-tab ${currentDay === index + 1 ? 'active' : ''}" onclick="switchDay(${index + 1})">
-            ${new Date(_.dt * 1000).toLocaleDateString('ka-GE', { weekday: 'short', day: 'numeric', month: 'short' })}
+            ${new Date(_.Date).toLocaleDateString('ka-GE', { weekday: 'short', day: 'numeric', month: 'short' })}
           </button>
         `).join('')}
       `;
@@ -182,21 +227,28 @@
         <p id="fishing-tip" class="text-sm font-semibold text-cyan-300 mt-2">--</p>
       `;
 
+      const locationKey = locations[location].locationKey;
+      if (!locationKey) {
+        contentDiv.innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა ლოკაციის განსაზღვრა. გთხოვთ, შეამოწმოთ API გასაღები.</p>';
+        return;
+      }
+
       if (dayIndex === 0) {
-        const data = await fetchCurrentWeather(locations[location].lat, locations[location].lon);
-        if (data) {
-          document.getElementById('temperature').textContent = `${Math.round(data.main.temp)} °C`;
-          document.getElementById('clouds').textContent = `ღრუბლიანობა: ${data.clouds.all}%`;
-          document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${data.rain ? (data.rain['3h'] || 0) : 0} მმ`;
-          document.getElementById('pressure').textContent = `წნევა: ${data.main.pressure} hPa`;
-          document.getElementById('wind').textContent = `ქარი: ${data.wind.speed} მ/წ, ${degreesToDirection(data.wind.deg)}`;
-          document.getElementById('gust').textContent = `ქარის ნაკადი: ${data.wind.gust ? data.wind.gust + ' მ/წ' : 'მიუწვდომელი'}`;
-          document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        const data = await fetchCurrentWeather(locationKey);
+        if (data && data[0]) {
+          const weather = data[0];
+          document.getElementById('temperature').textContent = `${Math.round(weather.Temperature.Metric.Value)} °C`;
+          document.getElementById('clouds').textContent = `ღრუბლიანობა: ${weather.CloudCover || 0}%`;
+          document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${weather.PrecipitationProbability || 0}%`;
+          document.getElementById('pressure').textContent = `წნევა: ${weather.Pressure.Metric.Value} hPa`;
+          document.getElementById('wind').textContent = `ქარი: ${weather.Wind.Speed.Metric.Value / 3.6} მ/წ, ${degreesToDirection(weather.Wind.Direction.Degrees)}`;
+          document.getElementById('gust').textContent = `ქარის ნაკადი: ${weather.WindGust.Speed.Metric.Value ? (weather.WindGust.Speed.Metric.Value / 3.6).toFixed(1) + ' მ/წ' : 'მიუწვდომელი'}`;
+          document.getElementById('weather-icon').src = `https://www.accuweather.com/images/weathericons/${weather.WeatherIcon}.svg`;
           document.getElementById('fishing-tip').textContent = getFishingTip(
-            data.main.temp,
-            data.clouds.all,
-            data.wind.speed,
-            data.main.pressure
+            weather.Temperature.Metric.Value,
+            weather.CloudCover || 0,
+            weather.Wind.Speed.Metric.Value / 3.6,
+            weather.Pressure.Metric.Value
           );
         } else {
           contentDiv.innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა. გთხოვთ, შეამოწმოთ API გასაღები ან ინტერნეტ კავშირი.</p>';
@@ -204,18 +256,18 @@
       } else {
         const day = forecastData[dayIndex - 1];
         if (day) {
-          document.getElementById('temperature').textContent = `${Math.round(day.main.temp)} °C`;
-          document.getElementById('clouds').textContent = `ღრუბლიანობა: ${day.clouds.all}%`;
-          document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${Math.round(day.pop * 100)}%`;
-          document.getElementById('pressure').textContent = `წნევა: ${day.main.pressure} hPa`;
-          document.getElementById('wind').textContent = `ქარი: ${day.wind.speed} მ/წ, ${degreesToDirection(day.wind.deg)}`;
+          document.getElementById('temperature').textContent = `${Math.round(day.Temperature.Maximum.Value)} °C`;
+          document.getElementById('clouds').textContent = `ღრუბლიანობა: ${day.Day.CloudCover || 0}%`;
+          document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${day.Day.PrecipitationProbability || 0}%`;
+          document.getElementById('pressure').textContent = `წნევა: ${day.AirAndPollen.find(p => p.Name === 'AirPressure')?.Value || 1013} hPa`;
+          document.getElementById('wind').textContent = `ქარი: ${day.Day.Wind.Speed.Value / 3.6} მ/წ, ${degreesToDirection(day.Day.Wind.Direction.Degrees)}`;
           document.getElementById('gust').textContent = `ქარის ნაკადი: მიუწვდომელი`;
-          document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${day.weather[0].icon}@2x.png`;
+          document.getElementById('weather-icon').src = `https://www.accuweather.com/images/weathericons/${day.Day.Icon}.svg`;
           document.getElementById('fishing-tip').textContent = getFishingTip(
-            day.main.temp,
-            day.clouds.all,
-            day.wind.speed,
-            day.main.pressure
+            day.Temperature.Maximum.Value,
+            day.Day.CloudCover || 0,
+            day.Day.Wind.Speed.Value / 3.6,
+            day.AirAndPollen.find(p => p.Name === 'AirPressure')?.Value || 1013
           );
         } else {
           contentDiv.innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა პროგნოზის ჩატვირთვა</p>';
@@ -228,7 +280,7 @@
       currentDay = dayIndex;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.querySelector(`button[onclick="switchLocation('${location}', ${dayIndex})"]`).classList.add('active');
-      forecastData = await fetchForecast(locations[location].lat, locations[location].lon);
+      forecastData = await fetchForecast(locations[location].locationKey);
       updateDayTabs();
       displayWeather(location, dayIndex);
     }
@@ -240,8 +292,8 @@
       displayWeather(currentLocation, dayIndex);
     }
 
-    // Initialize with Sion, current weather
-    switchLocation('sion', 0);
+    // Initialize location keys and start with Sion, current weather
+    initializeLocationKeys().then(() => switchLocation('sion', 0));
   </script>
 </body>
 </html>
