@@ -3,96 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>სათევზაო ამინდის პროგნოზი - მრავალი ლოკაცია</title>
+  <title>სათევზაო ამინდის პროგნოზი</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .weather-table {
-      background: linear-gradient(135deg, #e6f3fa, #b3e0f2);
-      border-collapse: separate;
-      border-spacing: 0;
+    .weather-container {
+      background: linear-gradient(135deg, #1e293b, #475569);
       border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
-    .weather-table th, .weather-table td {
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      padding: 12px;
-      text-align: center;
-      vertical-align: middle;
+    .tab {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      padding: 12px 20px;
+      border-radius: 8px;
+      transition: background 0.3s ease, transform 0.2s ease;
+      font-size: 1.1rem;
     }
-    .weather-table th {
-      background: linear-gradient(135deg, #1e90ff, #00b7eb);
+    .tab.active {
+      background: #3b82f6;
       color: white;
-      font-weight: bold;
+      transform: scale(1.05);
     }
-    .weather-table tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.7);
-    }
-    .weather-table tr:hover {
-      background: rgba(0, 191, 255, 0.1);
-      transition: background 0.2s ease;
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.2);
     }
     .weather-icon {
       filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
-    .forecast-cell {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-    }
     .forecast-day {
-      background: rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 8px;
-      padding: 8px;
-      min-width: 120px;
+      padding: 10px;
       transition: transform 0.2s ease;
     }
     .forecast-day:hover {
-      transform: scale(1.05);
-    }
-    .scrollable {
-      overflow-x: auto;
-      max-width: 100%;
+      transform: scale(1.03);
     }
     .header-icon {
       background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-2-10h4l2 4h-4l-2-4z"/></svg>') no-repeat center;
-      background-size: 30px;
+      background-size: 28px;
+    }
+    @media (max-width: 640px) {
+      .tab {
+        padding: 10px 15px;
+        font-size: 1rem;
+      }
+      .forecast-day {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
-<body class="bg-blue-50 py-8">
-  <div class="container mx-auto px-4">
-    <h1 class="text-3xl font-bold text-center text-blue-800 mb-8 flex items-center justify-center">
+<body class="bg-gray-800 min-h-screen flex items-center justify-center py-8">
+  <div class="weather-container text-white p-6 w-full max-w-2xl mx-4">
+    <h1 class="text-2xl font-bold mb-6 text-center flex items-center justify-center">
       <span class="header-icon w-8 h-8 mr-2"></span>
-      სათევზაო ამინდის პროგნოზი (20 მაისი, 2025)
+      სათევზაო ამინდი (20 მაისი, 2025)
     </h1>
-    <div class="scrollable">
-      <table id="weather-table" class="weather-table w-full">
-        <thead>
-          <tr>
-            <th>ლოკაცია</th>
-            <th>მიმდინარე სათევზაო ამინდი</th>
-            <th>7-დღიანი პროგნოზი</th>
-          </tr>
-        </thead>
-        <tbody id="weather-body">
-          <!-- Table rows will be populated here -->
-        </tbody>
-      </table>
+    <!-- Tabs -->
+    <div class="flex flex-wrap justify-center gap-2 mb-6">
+      <button class="tab active" onclick="switchLocation('sion')">სიონი</button>
+      <button class="tab" onclick="switchLocation('tsalka')">წალკა</button>
+      <button class="tab" onclick="switchLocation('bazaleti')">ბაზალეთი</button>
+      <button class="tab" onclick="switchLocation('tbilisi')">თბილისი</button>
+      <button class="tab" onclick="switchLocation('rustavi')">რუსთავი</button>
     </div>
-    <p class="text-xs text-center mt-8 text-gray-600">მონაცემები OpenWeatherMap-ისგან. 10-დღიანი პროგნოზისთვის საჭიროა ფასიანი API.</p>
+    <!-- Current Weather -->
+    <div id="current-weather" class="text-center mb-6">
+      <img id="weather-icon" class="weather-icon mx-auto mb-4" src="" alt="Weather Icon" width="60">
+      <p id="temperature" class="text-3xl font-semibold mb-2">-- °C</p>
+      <p id="clouds" class="text-sm">ღრუბლიანობა: --%</p>
+      <p id="precipitation" class="text-sm">ნალექის ალბათობა: --%</p>
+      <p id="pressure" class="text-sm">წნევა: -- hPa</p>
+      <p id="wind" class="text-sm">ქარი: -- მ/წ, --</p>
+      <p id="gust" class="text-sm">ქარის ნაკადი: --</p>
+      <p id="fishing-tip" class="text-sm font-semibold text-blue-300 mt-2">--</p>
+    </div>
+    <!-- 7-Day Forecast -->
+    <h3 class="text-lg font-semibold mb-4 text-center">7-დღიანი პროგნოზი</h3>
+    <div id="forecast" class="flex flex-col gap-4">
+      <!-- Forecast will be populated here -->
+    </div>
+    <p class="text-xs text-center mt-6 opacity-75">მონაცემები OpenWeatherMap-ისგან. 10-დღიანი პროგნოზისთვის საჭიროა ფასიანი API.</p>
   </div>
 
   <script>
     const apiKey = 'b5f3b44e0ff36c689aa09e1c5f227d6d'; // Provided OpenWeatherMap API key
-    const locations = [
-      { id: 'sion', name: 'სიონი', lat: 41.6333, lon: 44.0833 },
-      { id: 'tsalka', name: 'წალკა', lat: 41.5946, lon: 44.0891 },
-      { id: 'bazaleti', name: 'ბაზალეთი', lat: 42.0833, lon: 44.6833 },
-      { id: 'tbilisi', name: 'თბილისი', lat: 41.6941, lon: 44.8337 },
-      { id: 'rustavi', name: 'რუსთავი', lat: 41.5495, lon: 44.9932 }
-    ];
+    const locations = {
+      sion: { name: 'სიონი', lat: 41.6333, lon: 44.0833 },
+      tsalka: { name: 'წალკა', lat: 41.5946, lon: 44.0891 },
+      bazaleti: { name: 'ბაზალეთი', lat: 42.0833, lon: 44.6833 },
+      tbilisi: { name: 'თბილისი', lat: 41.6941, lon: 44.8337 },
+      rustavi: { name: 'რუსთავი', lat: 41.5495, lon: 44.9932 }
+    };
+    let currentLocation = 'sion';
 
     function degreesToDirection(degrees) {
       const directions = ['ჩ', 'ჩღ', 'ღ', 'ღა', 'ა', 'სა', 'ს', 'სდ', 'დ', 'დჩ', 'ჩ'];
@@ -115,10 +119,23 @@
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Network response was not ok');
-        return await response.json();
+        const data = await response.json();
+        document.getElementById('temperature').textContent = `${Math.round(data.main.temp)} °C`;
+        document.getElementById('clouds').textContent = `ღრუბლიანობა: ${data.clouds.all}%`;
+        document.getElementById('precipitation').textContent = `ნალექის ალბათობა: ${data.rain ? (data.rain['3h'] || 0) : 0} მმ`;
+        document.getElementById('pressure').textContent = `წნევა: ${data.main.pressure} hPa`;
+        document.getElementById('wind').textContent = `ქარი: ${data.wind.speed} მ/წ, ${degreesToDirection(data.wind.deg)}`;
+        document.getElementById('gust').textContent = `ქარის ნაკადი: ${data.wind.gust ? data.wind.gust + ' მ/წ' : 'მიუწვდომელი'}`;
+        document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+        document.getElementById('fishing-tip').textContent = getFishingTip(
+          data.main.temp,
+          data.clouds.all,
+          data.wind.speed,
+          data.main.pressure
+        );
       } catch (error) {
         console.error('Error fetching current weather:', error);
-        return null;
+        document.getElementById('current-weather').innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა. გთხოვთ, შეამოწმოთ API გასაღები ან ინტერნეტ კავშირი.</p>';
       }
     }
 
@@ -128,93 +145,49 @@
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        return data.list.filter((_, index) => index % 8 === 0).slice(0, 7); // Approximate daily data
-      } catch (error) {
-        console.error('Error fetching forecast:', error);
-        return [];
-      }
-    }
-
-    async function renderWeather() {
-      const tbody = document.getElementById('weather-body');
-      tbody.innerHTML = '';
-
-      for (const location of locations) {
-        const currentWeather = await fetchCurrentWeather(location.lat, location.lon);
-        const forecastData = await fetchForecast(location.lat, location.lon);
-
-        let currentWeatherHtml = '';
-        if (currentWeather) {
-          const windDirection = degreesToDirection(currentWeather.wind.deg);
-          const windGust = currentWeather.wind.gust ? `${currentWeather.wind.gust} მ/წ` : 'მიუწვდომელი';
+        const dailyData = data.list.filter((_, index) => index % 8 === 0).slice(0, 7);
+        const forecastDiv = document.getElementById('forecast');
+        forecastDiv.innerHTML = '';
+        dailyData.forEach(day => {
+          const date = new Date(day.dt * 1000).toLocaleDateString('ka-GE', { weekday: 'short', day: 'numeric', month: 'short' });
           const fishingTip = getFishingTip(
-            currentWeather.main.temp,
-            currentWeather.clouds.all,
-            currentWeather.wind.speed,
-            currentWeather.main.pressure
+            day.main.temp,
+            day.clouds.all,
+            day.wind.speed,
+            day.main.pressure
           );
-          currentWeatherHtml = `
-            <div class="flex flex-col items-center">
-              <img class="weather-icon mb-2" src="https://openweathermap.org/img/wn/${currentWeather.weather[0].icon}@2x.png" alt="Weather Icon" width="60">
-              <p class="text-xl font-semibold">${Math.round(currentWeather.main.temp)} °C</p>
-              <p class="text-sm capitalize">${currentWeather.weather[0].description}</p>
-              <p class="text-xs">ღრუბლიანობა: ${currentWeather.clouds.all}%</p>
-              <p class="text-xs">ნალექის ალბათობა: ${currentWeather.rain ? currentWeather.rain['3h'] || '0' : '0'} მმ</p>
-              <p class="text-xs">წნევა: ${currentWeather.main.pressure} hPa</p>
-              <p class="text-xs">ქარი: ${currentWeather.wind.speed} მ/წ, ${windDirection}</p>
-              <p class="text-xs">ქარის ნაკადი: ${windGust}</p>
-              <p class="text-xs font-semibold text-blue-800 mt-2">${fishingTip}</p>
+          const card = `
+            <div class="forecast-day text-center">
+              <p class="font-medium text-sm">${date}</p>
+              <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png" alt="Weather Icon" class="mx-auto my-2" width="40">
+              <p class="text-sm">${Math.round(day.main.temp)} °C</p>
+              <p class="text-xs">ღრუბლიანობა: ${day.clouds.all}%</p>
+              <p class="text-xs">ნალექის ალბ.: ${Math.round(day.pop * 100)}%</p>
+              <p class="text-xs">წნევა: ${day.main.pressure} hPa</p>
+              <p class="text-xs">ქარი: ${day.wind.speed} მ/წ, ${degreesToDirection(day.wind.deg)}</p>
+              <p class="text-xs font-semibold text-blue-300 mt-1">${fishingTip}</p>
             </div>
           `;
-        } else {
-          currentWeatherHtml = '<p class="text-red-600 text-center">ვერ მოხერხდა ამინდის მონაცემების ჩატვირთვა. გთხოვთ, შეამოწმოთ API გასაღები ან ინტერნეტ კავშირი.</p>';
-        }
-
-        let forecastHtml = '';
-        if (forecastData.length > 0) {
-          forecastHtml = '<div class="forecast-cell">';
-          forecastData.forEach(day => {
-            const date = new Date(day.dt * 1000).toLocaleDateString('ka-GE', { weekday: 'short', day: 'numeric', month: 'short' });
-            const windDirection = degreesToDirection(day.wind.deg);
-            const pop = day.pop ? Math.round(day.pop * 100) : 0;
-            const fishingTip = getFishingTip(
-              day.main.temp,
-              day.clouds.all,
-              day.wind.speed,
-              day.main.pressure
-            );
-            forecastHtml += `
-              <div class="forecast-day">
-                <p class="font-medium text-xs">${date}</p>
-                <img src="https://openweathermap.org/img/wn/${day.weather[0].icon}.png" alt="Weather Icon" class="mx-auto my-1" width="40">
-                <p class="text-sm">${Math.round(day.main.temp)} °C</p>
-                <p class="text-xs capitalize">${day.weather[0].description}</p>
-                <p class="text-xs">ღრუბლიანობა: ${day.clouds.all}%</p>
-                <p class="text-xs">ნალექის ალბ.: ${pop}%</p>
-                <p class="text-xs">წნევა: ${day.main.pressure} hPa</p>
-                <p class="text-xs">ქარი: ${day.wind.speed} მ/წ, ${windDirection}</p>
-                <p class="text-xs font-semibold text-blue-800 mt-1">${fishingTip}</p>
-              </div>
-            `;
-          });
-          forecastHtml += '</div>';
-        } else {
-          forecastHtml = '<p class="text-red-600 text-center">ვერ მოხერხდა პროგნოზის ჩატვირთვა</p>';
-        }
-
-        const rowHtml = `
-          <tr>
-            <td class="font-bold">${location.name}</td>
-            <td>${currentWeatherHtml}</td>
-            <td>${forecastHtml}</td>
-          </tr>
-        `;
-        tbody.innerHTML += rowHtml;
+          forecastDiv.innerHTML += card;
+        });
+      } catch (error) {
+        console.error('Error fetching forecast:', error);
+        document.getElementById('forecast').innerHTML = '<p class="text-red-400 text-center">ვერ მოხერხდა პროგნოზის ჩატვირთვა</p>';
       }
     }
 
-    // Initialize
-    renderWeather();
+    function switchLocation(location) {
+      currentLocation = location;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`button[onclick="switchLocation('${location}')"]`).classList.add('active');
+      const { lat, lon } = locations[location];
+      fetchCurrentWeather(lat, lon);
+      fetchForecast(lat, lon);
+    }
+
+    // Initialize with Sion
+    fetchCurrentWeather(locations.sion.lat, locations.sion.lon);
+    fetchForecast(locations.sion.lat, locations.sion.lon);
   </script>
 </body>
 </html>
